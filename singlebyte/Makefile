@@ -1,7 +1,7 @@
 obj-m += singlebyte.o
 
 all:
-	make -C /code/kernel/linux-4.20.4 M=$(PWD) modules
+	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
 
 clean:
-	make -C /code/kernel/linux-4.20.4 M=$(PWD) clean
+	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean

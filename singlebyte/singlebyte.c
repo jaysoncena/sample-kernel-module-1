@@ -8,7 +8,9 @@
 #include <linux/proc_fs.h>
 #include <asm/uaccess.h>
 
-#define MAJOR_NUMBER 61
+#define MAJOR_NUMBER        61
+#define ONEBYTE_DEVICENAME  "onebyte"
+#define ONEBYTE_MAXSIZE     1;
 
 /* forward declaration */
 int onebyte_open(struct inode *inode, struct file *filep);
@@ -29,29 +31,50 @@ char *onebyte_data = NULL;
 
 int onebyte_open(struct inode *inode, struct file *filep)
 {
-     return 0; // always successful
+    printk(KERN_ALERT "singlebyte: %s()\n", __FUNCTION__);
+    return 0; // always successful
 }
 
 int onebyte_release(struct inode *inode, struct file *filep)
 {
-     return 0; // always successful
+    printk(KERN_ALERT "singlebyte: %s()\n", __FUNCTION__);
+    return 0; // always successful
 }
 
 ssize_t onebyte_read(struct file *filep, char *buf, size_t count, loff_t *f_pos)
 {
+    printk(KERN_ALERT "singlebyte: %s()\n", __FUNCTION__);
     /*please complete the function on your own*/
+
+    return 0;
 }
 
 ssize_t onebyte_write(struct file *filep, const char *buf, size_t count, loff_t *f_pos)
 {
+    printk(KERN_ALERT "singlebyte: %s()\n", __FUNCTION__);
     /*please complete the function on your own*/
+
+    size_t maxdatalen = 1;
+    site_t lennotcopied = 0;
+    uint8_t databuf[maxdatalen];
+
+    lennotcopied = copy_to_user(buf, onebyte_data, ONEBYTE_MAXSIZE);
+    printk(KERN_ALERT "singlebyte: %s(): Stored %zd bytes out of %zd bytes\n",
+        __FUNCTION__, (count-lennotcopied), count);
+
+    printk(KERN_ALERT "singlebyte: %s(): onebyte_data=%s\n", __FUNCTION__, onebyte_data);
+
+    if (lennotcopied = 0) return 0;
+    return -ENOSPC;
 }
 
 static int onebyte_init(void)
 {
+    printk(KERN_ALERT "singlebyte: %s()\n", __FUNCTION__);
+
     int result;
     // register the device
-    result = register_chrdev(MAJOR_NUMBER, "onebyte", &onebyte_fops);
+    result = register_chrdev(MAJOR_NUMBER, ONEBYTE_DEVICENAME, &onebyte_fops);
 
     if (result < 0) {
         return result;
@@ -63,6 +86,7 @@ static int onebyte_init(void)
     // To release the memory allocated by kmalloc, use kfree.
     onebyte_data = kmalloc(sizeof(char), GFP_KERNEL);
     if (!onebyte_data) {
+        printk(KERN_ALERT "singlebyte: %s(): kmalloc() failed\n", __FUNCTION__);
         onebyte_exit();
         // cannot allocate memory
         // return no memory error, negative signify a failure
@@ -77,7 +101,9 @@ static int onebyte_init(void)
 
 static void onebyte_exit(void)
 {
-     // if the pointer is pointing to something
+    printk(KERN_ALERT "singlebyte: %s()\n", __FUNCTION__);
+
+    // if the pointer is pointing to something
     if (onebyte_data) {
         // free the memory and assign the pointer to NULL
         kfree(onebyte_data);
@@ -85,7 +111,7 @@ static void onebyte_exit(void)
     }
 
     // unregister the device
-    unregister_chrdev(MAJOR_NUMBER, "onebyte");
+    unregister_chrdev(MAJOR_NUMBER, ONEBYTE_DEVICENAME);
     printk(KERN_ALERT "Onebyte device module is unloaded\n");
 }
 

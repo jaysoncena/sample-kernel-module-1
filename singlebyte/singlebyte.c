@@ -61,7 +61,7 @@ ssize_t onebyte_write(struct file *filep, const char *buf, size_t count, loff_t 
         __FUNCTION__, (count-lennotcopied), count);
 
     printk(KERN_ALERT "singlebyte: %s(): onebyte_data=%.*s\n",
-        __FUNCTION__, sizeof(onebyte_data), onebyte_data);
+        __FUNCTION__, (int)sizeof(onebyte_data), onebyte_data);
 
     if (count > ONEBYTE_MAXSIZE) return -ENOSPC;
     return count;
@@ -74,7 +74,7 @@ static int onebyte_init(void)
     printk(KERN_ALERT "singlebyte: %s()\n", __FUNCTION__);
 
     // register the device
-    result = register_chrdev(MAJOR_NUMBER, ONEBYTE_DEVICENAME, onebyte_fops);
+    result = register_chrdev(MAJOR_NUMBER, ONEBYTE_DEVICENAME, &onebyte_fops);
 
     if (result < 0) {
         return result;

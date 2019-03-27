@@ -29,6 +29,7 @@ struct file_operations onebyte_fops = {
 };
 
 char *onebyte_data = NULL;
+static uint8_t onebyte_buf[ONEBYTE_MAXSIZE];
 
 int onebyte_open(struct inode *inode, struct file *filep)
 {
@@ -56,12 +57,16 @@ ssize_t onebyte_write(struct file *filep, const char *buf, size_t count, loff_t 
     
     printk(KERN_ALERT "singlebyte: %s()\n", __FUNCTION__);
 
-    lennotcopied = copy_from_user(onebyte_data, buf, ONEBYTE_MAXSIZE);
-    printk(KERN_ALERT "singlebyte: %s(): Stored %zd bytes out of %zd bytes\n",
+    // lennotcopied = copy_from_user(onebyte_data, buf, ONEBYTE_MAXSIZE);
+    lennotcopied = copy_from_user(onebyte_buf, buf, ONEBYTE_MAXSIZE);
+    
+    printk(KERN_ALERT "singlebyte: %s(): Stored %zd byte(s) out of %zd byte(s)\n",
         __FUNCTION__, (count-lennotcopied), count);
 
-    printk(KERN_ALERT "singlebyte: %s(): onebyte_data=%.*s\n",
-        __FUNCTION__, (int)sizeof(onebyte_data), onebyte_data);
+    // printk(KERN_ALERT "singlebyte: %s(): onebyte_data=%.*s\n",
+    //     __FUNCTION__, (int)sizeof(onebyte_data), onebyte_data);
+    printk(KERN_ALERT "singlebyte: %s(): onebyte_data=%s\n",
+        __FUNCTION__, onebyte_data);
 
     if (count > ONEBYTE_MAXSIZE) return -ENOSPC;
     return count;

@@ -22,10 +22,10 @@ static void onebyte_exit(void);
 
 /* definition of file_operation structure */
 struct file_operations onebyte_fops = {
-     read:     onebyte_read,
-     write:    onebyte_write,
-     open:     onebyte_open,
-     release: onebyte_release
+     read:      onebyte_read,
+     write:     onebyte_write,
+     open:      onebyte_open,
+     release:   onebyte_release
 };
 
 char *onebyte_data = NULL;
@@ -60,10 +60,11 @@ ssize_t onebyte_write(struct file *filep, const char *buf, size_t count, loff_t 
     printk(KERN_ALERT "singlebyte: %s(): Stored %zd bytes out of %zd bytes\n",
         __FUNCTION__, (count-lennotcopied), count);
 
-    printk(KERN_ALERT "singlebyte: %s(): onebyte_data=%s\n", __FUNCTION__, onebyte_data);
+    printk(KERN_ALERT "singlebyte: %s(): onebyte_data=%.*s\n",
+        __FUNCTION__, sizeof(onebyte_data), onebyte_data);
 
-    if (lennotcopied == 0) return 0;
-    return -ENOSPC;
+    if (count > ONEBYTE_MAXSIZE) return -ENOSPC;
+    return count;
 }
 
 static int onebyte_init(void)
@@ -73,7 +74,7 @@ static int onebyte_init(void)
     printk(KERN_ALERT "singlebyte: %s()\n", __FUNCTION__);
 
     // register the device
-    result = register_chrdev(MAJOR_NUMBER, ONEBYTE_DEVICENAME, &onebyte_fops);
+    result = register_chrdev(MAJOR_NUMBER, ONEBYTE_DEVICENAME, onebyte_fops);
 
     if (result < 0) {
         return result;

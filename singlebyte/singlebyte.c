@@ -7,10 +7,11 @@
 #include <linux/fs.h>
 #include <linux/proc_fs.h>
 #include <asm/uaccess.h>
+#include <linux/uaccess.h>
 
 #define MAJOR_NUMBER        61
 #define ONEBYTE_DEVICENAME  "onebyte"
-#define ONEBYTE_MAXSIZE     1;
+#define ONEBYTE_MAXSIZE     1
 
 /* forward declaration */
 int onebyte_open(struct inode *inode, struct file *filep);
@@ -51,28 +52,26 @@ ssize_t onebyte_read(struct file *filep, char *buf, size_t count, loff_t *f_pos)
 
 ssize_t onebyte_write(struct file *filep, const char *buf, size_t count, loff_t *f_pos)
 {
+    size_t lennotcopied = 0;
+    
     printk(KERN_ALERT "singlebyte: %s()\n", __FUNCTION__);
-    /*please complete the function on your own*/
 
-    size_t maxdatalen = 1;
-    site_t lennotcopied = 0;
-    uint8_t databuf[maxdatalen];
-
-    lennotcopied = copy_to_user(buf, onebyte_data, ONEBYTE_MAXSIZE);
+    lennotcopied = copy_from_user(onebyte_data, buf, ONEBYTE_MAXSIZE);
     printk(KERN_ALERT "singlebyte: %s(): Stored %zd bytes out of %zd bytes\n",
         __FUNCTION__, (count-lennotcopied), count);
 
     printk(KERN_ALERT "singlebyte: %s(): onebyte_data=%s\n", __FUNCTION__, onebyte_data);
 
-    if (lennotcopied = 0) return 0;
+    if (lennotcopied == 0) return 0;
     return -ENOSPC;
 }
 
 static int onebyte_init(void)
 {
+    int result;
+
     printk(KERN_ALERT "singlebyte: %s()\n", __FUNCTION__);
 
-    int result;
     // register the device
     result = register_chrdev(MAJOR_NUMBER, ONEBYTE_DEVICENAME, &onebyte_fops);
 

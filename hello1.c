@@ -1,12 +1,17 @@
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/module.h>
+#include <linux/moduleparam.h>
 
 MODULE_LICENSE("GPL");
 
+// module argument
+static char *who = "nobody";
+module_param(who, charp, 0660);
+
 static int hello_init(void)
 {
-     printk(KERN_ALERT "Hello, world\n");
+     printk(KERN_ALERT "Hello, %s\n", who);
      
      return 0;
 }

@@ -2,3 +2,5 @@
 *.ko*
 *.mod*
 *.o*
+.vscode/
+Module.symvers

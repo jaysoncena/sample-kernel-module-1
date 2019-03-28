@@ -45,10 +45,25 @@ int onebyte_release(struct inode *inode, struct file *filep)
 
 ssize_t onebyte_read(struct file *filep, char *buf, size_t count, loff_t *f_pos)
 {
+    size_t lennotcopied;
+    // char xxx[] = "J";
+
     printk(KERN_ALERT "singlebyte: %s()\n", __FUNCTION__);
     /*please complete the function on your own*/
 
-    if (copy_to_user(buf, onebyte_data, ONEBYTE_MAXSIZE)) {
+    // we've already copied the data, return 0 now to stop dumping data
+    // note that if we did not do this, we'll keep on throwing single-char
+    // single-char data continuously
+    if (*buf != 0) {
+        return 0;
+    }
+
+    lennotcopied = copy_to_user(buf, onebyte_buf, ONEBYTE_MAXSIZE);
+    printk(KERN_ALERT "singlebyte: %s(): lennotcopied=%zd, *buf=%d\n", __FUNCTION__, lennotcopied, *buf);
+
+    if (*buf == 0 && lennotcopied != 0) {
+        // *buf == 0 means the buffer has NULL
+        // lennotcopied != 0 means we have NOT copied N length
         return -EFAULT;
     }
 

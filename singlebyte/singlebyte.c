@@ -59,6 +59,11 @@ ssize_t onebyte_write(struct file *filep, const char *buf, size_t count, loff_t 
 
     // lennotcopied = copy_from_user(onebyte_data, buf, ONEBYTE_MAXSIZE);
     lennotcopied = copy_from_user(onebyte_buf, buf, ONEBYTE_MAXSIZE);
+
+    if (lennotcopied == 0 && count > ONEBYTE_MAXSIZE) {
+        // copy_from_user is successful but data is larger than ONEBYTE_MAXSIZE
+        lennotcopied = count - ONEBYTE_MAXSIZE;
+    }
     
     printk(KERN_ALERT "singlebyte: %s(): Stored %zd byte(s) out of %zd byte(s)\n",
         __FUNCTION__, (count-lennotcopied), count);
@@ -66,7 +71,7 @@ ssize_t onebyte_write(struct file *filep, const char *buf, size_t count, loff_t 
     // printk(KERN_ALERT "singlebyte: %s(): onebyte_data=%.*s\n",
     //     __FUNCTION__, (int)sizeof(onebyte_data), onebyte_data);
     printk(KERN_ALERT "singlebyte: %s(): onebyte_data=%s\n",
-        __FUNCTION__, onebyte_data);
+        __FUNCTION__, onebyte_buf);
 
     if (count > ONEBYTE_MAXSIZE) return -ENOSPC;
     return count;
@@ -85,21 +90,8 @@ static int onebyte_init(void)
         return result;
     }
 
-    // allocate one byte of memory for storage
-    // kmalloc is just like malloc, the second parameter is
-    // the type of memory to be allocated.
-    // To release the memory allocated by kmalloc, use kfree.
-    onebyte_data = kmalloc(sizeof(char), GFP_KERNEL);
-    if (!onebyte_data) {
-        printk(KERN_ALERT "singlebyte: %s(): kmalloc() failed\n", __FUNCTION__);
-        onebyte_exit();
-        // cannot allocate memory
-        // return no memory error, negative signify a failure
-        return -ENOMEM;
-    }
-
     // initialize the value to be X
-    *onebyte_data = 'X';
+    onebyte_buf[0] = 88; // X
     printk(KERN_ALERT "This is a onebyte device module\n");
     return 0;
 }

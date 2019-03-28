@@ -46,10 +46,8 @@ int onebyte_release(struct inode *inode, struct file *filep)
 ssize_t onebyte_read(struct file *filep, char *buf, size_t count, loff_t *f_pos)
 {
     size_t lennotcopied;
-    // char xxx[] = "J";
 
     printk(KERN_ALERT "singlebyte: %s()\n", __FUNCTION__);
-    /*please complete the function on your own*/
 
     // we've already copied the data, return 0 now to stop dumping data
     // note that if we did not do this, we'll keep on throwing single-char
@@ -59,7 +57,8 @@ ssize_t onebyte_read(struct file *filep, char *buf, size_t count, loff_t *f_pos)
     }
 
     lennotcopied = copy_to_user(buf, onebyte_buf, ONEBYTE_MAXSIZE);
-    printk(KERN_ALERT "singlebyte: %s(): lennotcopied=%zd, *buf=%d\n", __FUNCTION__, lennotcopied, *buf);
+    printk(KERN_ALERT "singlebyte: %s(): lennotcopied=%zd, *buf=%d, count=%zdn",
+        __FUNCTION__, lennotcopied, *buf, count);
 
     if (*buf == 0 && lennotcopied != 0) {
         // *buf == 0 means the buffer has NULL
@@ -72,11 +71,10 @@ ssize_t onebyte_read(struct file *filep, char *buf, size_t count, loff_t *f_pos)
 
 ssize_t onebyte_write(struct file *filep, const char *buf, size_t count, loff_t *f_pos)
 {
-    size_t lennotcopied = 0;
+    size_t lennotcopied;
     
     printk(KERN_ALERT "singlebyte: %s()\n", __FUNCTION__);
 
-    // lennotcopied = copy_from_user(onebyte_data, buf, ONEBYTE_MAXSIZE);
     lennotcopied = copy_from_user(onebyte_buf, buf, ONEBYTE_MAXSIZE);
 
     if (lennotcopied == 0 && count > ONEBYTE_MAXSIZE) {
@@ -87,8 +85,6 @@ ssize_t onebyte_write(struct file *filep, const char *buf, size_t count, loff_t 
     printk(KERN_ALERT "singlebyte: %s(): Stored %zd byte(s) out of %zd byte(s)\n",
         __FUNCTION__, (count-lennotcopied), count);
 
-    // printk(KERN_ALERT "singlebyte: %s(): onebyte_data=%.*s\n",
-    //     __FUNCTION__, (int)sizeof(onebyte_data), onebyte_data);
     printk(KERN_ALERT "singlebyte: %s(): onebyte_data=%s\n",
         __FUNCTION__, onebyte_buf);
 
